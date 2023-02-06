@@ -19,11 +19,12 @@ public class BallController : MonoBehaviour
     {
 		// No es la forma!!
         direction = transform.GetChild(0);
+		direction.gameObject.SetActive(false);
     }
 
     void Update()
     {
-        direction.localRotation *= Quaternion.Euler(0, 0, -rotationDegrees * Time.deltaTime);
+        //direction.localRotation *= Quaternion.Euler(0, 0, -rotationDegrees * Time.deltaTime);
 
 		ManageInput();
     }
@@ -46,13 +47,39 @@ public class BallController : MonoBehaviour
 		}
 	}
 
+	Vector2 touchBeganPosition;
 	void ManageInput()
 	{
-		bool space = Input.GetKey(KeyCode.Space);
+		// bool space = Input.GetKey(KeyCode.Space);
 
-		if (space)
+		// if (space)
+		// {
+		// 	Kick();
+		// }
+
+		if (Input.touchCount > 0)
 		{
-			Kick();
+			Touch touch = Input.GetTouch(0);
+
+			if (touch.phase == TouchPhase.Began)
+			{
+				touchBeganPosition = touch.position;
+				direction.gameObject.SetActive(true);
+			}
+
+			if (touch.phase == TouchPhase.Moved)
+			{
+				Vector3 dir = (touchBeganPosition - touch.position).normalized;
+				float angle = Vector2.SignedAngle(Vector2.one, dir);
+				direction.rotation = Quaternion.Euler(0, 0, angle);
+			}
+
+			if (touch.phase == TouchPhase.Ended)
+			{
+				direction.gameObject.SetActive(false);
+				Kick();
+			}
+
 		}
 
 	}
